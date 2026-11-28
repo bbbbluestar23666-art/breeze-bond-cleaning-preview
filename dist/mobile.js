@@ -25,29 +25,12 @@ chooser.addEventListener('close',()=>trigger?.focus());
 const dock=document.createElement('a');dock.href='#quoteLines';dock.className='mobile-price-dock';dock.innerHTML='<span id="dockStatus"></span><strong id="dockPrice" aria-live="polite"></strong>';document.body.append(dock);
 function syncDock(){const q=calculate();document.querySelector('#dockPrice').textContent='A$'+money(q.sum)+(q.unresolved.length?'+':'');document.querySelector('#dockStatus').textContent=q.unresolved.length?'From · incl. GST':'Total incl. GST';dock.setAttribute('aria-label','View full estimate: '+document.querySelector('#dockStatus').textContent+' '+document.querySelector('#dockPrice').textContent)}
 new MutationObserver(syncDock).observe(document.querySelector('#total'),{childList:true});syncDock();
-// Fit only the decorative display lettering; body text and browser zoom remain unrestricted.
-function fitDisplayTitle(){
- const title=document.querySelector('.artistic-title');if(!title)return;
- const spans=[title.querySelector('.bond-word'),title.querySelector('.service-word')];
- if(!matchMedia('(max-width:1024px)').matches){spans.forEach(s=>s.style.removeProperty('font-size'));return}
- const available=Math.max(0,title.clientWidth-16);
- for(const span of spans){
-  span.style.removeProperty('font-size');
-  const width=span.getBoundingClientRect().width;
-  if(width>available&&available>0){const size=parseFloat(getComputedStyle(span).fontSize);span.style.fontSize=(size*available/width*.97)+'px'}
- }
-}
-document.fonts.ready.then(fitDisplayTitle);
-addEventListener('resize',fitDisplayTitle);
-new ResizeObserver(fitDisplayTitle).observe(document.querySelector('.hero'));
-
+const paymentSection = document.querySelector('.demo-deposit');
+new IntersectionObserver(([entry]) => {
+  dock.style.display = entry.isIntersecting ? 'none' : '';
+}).observe(paymentSection);
 // Measure fixed-bar height so enlarged system fonts cannot cover the final controls.
-new ResizeObserver(()=>document.documentElement.style.setProperty('--price-dock-height',dock.getBoundingClientRect().height+'px')).observe(dock);
-function fitQuoteHeading(){
- const heading=document.querySelector('.quote-title');if(!heading)return;
- heading.style.removeProperty('font-size');const words=[...heading.querySelectorAll('span')];words.forEach(s=>s.style.removeProperty('font-size'));
- if(!mobileQuery.matches)return;
- const available=heading.clientWidth;const max=Math.max(...words.map(s=>s.getBoundingClientRect().width));
- if(max>available){const size=parseFloat(getComputedStyle(words[0]).fontSize)*available/max*.98;heading.style.fontSize=size+'px';words.forEach(s=>s.style.fontSize=size+'px')}
-}
-document.fonts.ready.then(fitQuoteHeading);addEventListener('resize',fitQuoteHeading);new ResizeObserver(fitQuoteHeading).observe(document.querySelector('.section-head'));
+new ResizeObserver(() => {
+  const height = dock.getBoundingClientRect().height;
+  if (height > 0) document.documentElement.style.setProperty('--price-dock-height', height + 'px');
+}).observe(dock);

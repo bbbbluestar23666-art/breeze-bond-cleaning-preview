@@ -1,0 +1,2 @@
+function renderFaq(filter='all'){document.querySelector('#faqList').innerHTML=faqs.filter(x=>filter==='all'||x[0]===filter).map(x=>`<details class="faq-item"><summary><span>${x[1]}${x[3]?'<span class="policy">DRAFT</span>':''}</span></summary><p>${x[2]}</p></details>`).join('')};document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-filter]').forEach(x=>x.classList.toggle('active',x===b));renderFaq(b.dataset.filter)}));
+renderFaq();
